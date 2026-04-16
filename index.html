@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Editorial pretext demo: animated orbs, live multi-column text flow, and zero DOM measurements.">
-  <title>The Editorial Engine</title>
+  <title>File Dump</title>
   <style>
     * { box-sizing: border-box; margin: 0; }
     html, body {
@@ -36,7 +36,7 @@
     }
     .pullquote-line {
       position: absolute; white-space: pre;
-      font-style: italic; color: #ffb0bc;
+      font-style: italic; color: #ffd9de;
       user-select: text; -webkit-user-select: text;
     }
     .pdf-download-link {
@@ -3503,7 +3503,7 @@ function layoutWithLines(prepared, maxWidth, lineHeight) {
 var BODY_FONT = '18px "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif';
 var BODY_LINE_HEIGHT = 30;
 var HEADLINE_FONT_FAMILY = '"Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, serif';
-var HEADLINE_TEXT = "ZUXU4N'S PROJECT\u2002DUMP";
+var HEADLINE_TEXT = "ZUXU4N'S FILE\u2002DUMP";
 var GUTTER = 48;
 var COL_GAP = 40;
 var BOTTOM_GAP = 20;
@@ -3579,6 +3579,7 @@ I predict the gap between intelligence and new ideas will turn out to be an inte
 var PULLQUOTE_TEXTS = [
   "CS234 Practice Problems\n— Interpolation\n\n->  Download PDF",
   "rosint.dev",
+  "uw-ics-cleaner.vercel.app",
   "\u201CBeyond Smart. \u2014 credit: Paul Graham\u201D"
 ];
 var stage = getRequiredDiv("stage");
@@ -3608,7 +3609,8 @@ var preparedPullquotes = PULLQUOTE_TEXTS.map((text) => prepareWithSegments(text,
 var pullquoteSpecs = [
   { prepared: preparedPullquotes[0], placement: { colIdx: 0, yFrac: 0, wFrac: 0.65, side: "left" } },
   { prepared: preparedPullquotes[1], placement: { colIdx: 0, yFrac: 0, wFrac: 0.65, side: "left" } },
-  { prepared: preparedPullquotes[2], placement: { colIdx: 1, yFrac: 0.32, wFrac: 0.5, side: "left" } }
+  { prepared: preparedPullquotes[2], placement: { colIdx: 0, yFrac: 0, wFrac: 0.65, side: "left" } },
+  { prepared: preparedPullquotes[3], placement: { colIdx: 1, yFrac: 0.32, wFrac: 0.5, side: "left" } }
 ];
 var DROP_CAP_SIZE = BODY_LINE_HEIGHT * DROP_CAP_LINES - 4;
 var DROP_CAP_FONT = `700 ${DROP_CAP_SIZE}px ${HEADLINE_FONT_FAMILY}`;
@@ -3638,6 +3640,13 @@ rosintLinkEl.rel = "noreferrer";
 rosintLinkEl.className = "pdf-download-link";
 rosintLinkEl.style.display = "none";
 stage.appendChild(rosintLinkEl);
+var uwIcsLinkEl = document.createElement("a");
+uwIcsLinkEl.href = "https://uw-ics-cleaner.vercel.app/";
+uwIcsLinkEl.target = "_blank";
+uwIcsLinkEl.rel = "noreferrer";
+uwIcsLinkEl.className = "pdf-download-link";
+uwIcsLinkEl.style.display = "none";
+stage.appendChild(uwIcsLinkEl);
 var linePool = [];
 var headlinePool = [];
 var pullquoteLinePool = [];
@@ -4103,9 +4112,9 @@ function render(now) {
     const pullquoteWidth = Math.round(columnWidth * placement.wFrac);
     const pullquoteLines2 = layoutWithLines(prepared, pullquoteWidth - 20, PQ_LINE_HEIGHT).lines;
     const pullquoteHeight = pullquoteLines2.length * PQ_LINE_HEIGHT + 16;
-    const columnX = (index <= 1 ? pdfContentLeft : contentLeft) + placement.colIdx * (columnWidth + colGap);
+    const columnX = (index <= 2 ? pdfContentLeft : contentLeft) + placement.colIdx * (columnWidth + colGap);
     const pullquoteX = placement.side === "right" ? columnX + columnWidth - pullquoteWidth : columnX;
-    const pullquoteY = index === 1 && pullquoteRects.length > 0 ? pullquoteRects[0].y + pullquoteRects[0].h + 8 : Math.round(bodyTop + bodyHeight * placement.yFrac);
+    const pullquoteY = (index === 1 || index === 2) && pullquoteRects.length >= index ? pullquoteRects[index - 1].y + pullquoteRects[index - 1].h + 8 : Math.round(bodyTop + bodyHeight * placement.yFrac);
     const positionedLines = pullquoteLines2.map((line, lineIndex) => ({
       x: pullquoteX + 20,
       y: pullquoteY + 8 + lineIndex * PQ_LINE_HEIGHT,
@@ -4209,8 +4218,20 @@ function render(now) {
     } else {
       rosintLinkEl.style.display = "none";
     }
+    if (pullquoteRects.length > 2) {
+      const pq2 = pullquoteRects[2];
+      uwIcsLinkEl.style.display = "";
+      uwIcsLinkEl.style.left = `${pq2.x}px`;
+      uwIcsLinkEl.style.top = `${pq2.y}px`;
+      uwIcsLinkEl.style.width = `${pq2.w}px`;
+      uwIcsLinkEl.style.height = `${pq2.h}px`;
+    } else {
+      uwIcsLinkEl.style.display = "none";
+    }
   } else {
     pdfLinkEl.style.display = "none";
+    rosintLinkEl.style.display = "none";
+    uwIcsLinkEl.style.display = "none";
   }
   for (let index = 0; index < orbs.length; index++) {
     const orb = orbs[index];
